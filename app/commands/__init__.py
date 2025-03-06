@@ -25,9 +25,9 @@ class CommandHandler:
             executor = self.commands[command_name]
             # Handle both callable functions and command objects
             if callable(executor) and not hasattr(executor, 'execute'):
-                executor(None, *args) # pass None as the app instance for simple functions
+                executor(*args) # pass None as the app instance for simple functions
             else:
-                executor.execute(None, *args) #for command objects
+                executor.execute(*args) #for command objects
             return True
         return False
 
