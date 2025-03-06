@@ -16,10 +16,10 @@ disable= unused-argument,
 output-format=colorized
 
 # Include a report at the end of the log
-reports=yes
+#reports=yes
 
 # Put a full report at the end of the file
-report-full=no
+#report-full=no
 
 [DESIGN]
 # Maximum number of parents for a class (see R0901).
