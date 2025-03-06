@@ -13,7 +13,8 @@ disable= unused-argument,
          missing-final-newline,
          missing-function-docstring,
          unused-variable,
-         missing-module-docstring
+         missing-module-docstring,
+         unused-import
 
 [REPORTS]
 # Set the output format. Available formats: text, parseable, colorized, json, msvs (visual studio) and html
