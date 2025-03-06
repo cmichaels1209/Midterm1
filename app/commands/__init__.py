@@ -9,19 +9,26 @@ class CommandHandler:
     def __init__(self):
         self.commands = {}
 
-    def register_command(self, command_name: str, command: Command):
-        self.commands[command_name] = command
+    def register_command(self, command_name, command_executor):
+        self.commands[command_name.lower()] = command_executor
 
-    def execute_command(self, command_name: str):
-        """ Look before you leap (LBYL) - Use when its less likely to work
+    def execute_command(self, command_input):
+        # split the input into command and arguments
+        parts = command_input.split()
+        if not parts:
+            return False
+
+        command_name = parts[0].lower()
+        args = parts[1:]
+
         if command_name in self.commands:
-            self.commands[command_name].execute()
-        else:
-            print(f"No such command: {command_name}")
-        """
-        """Easier to ask for forgiveness than permission (EAFP) - Use when its going to most likely work"""
-        try:
-            self.commands[command_name].execute()
-        except KeyError:
-            print(f"No such command: {command_name}")
+            executor = self.commands[command_name]
+            # Handle both callable functions and command objects
+            if callable(executor) and not hasattr(executor, 'execute'):
+                executor(None, *args) # pass None as the app instance for simple functions
+            else:
+                executor.execute(None, *args) #for command objects
+            return True
+        return False
+
 
