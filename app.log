@@ -1,0 +1,12 @@
+2025-03-08 22:41:50,548 - app - INFO - Logging initialized successfully!
+2025-03-08 22:41:50,549 - root - INFO - Environment variables loaded.
+2025-03-08 22:41:50,561 - root - INFO - Command 'discord' from plugin 'discord' registered.
+2025-03-08 22:41:50,562 - root - INFO - Command 'email' from plugin 'email' registered.
+2025-03-08 22:41:50,563 - root - INFO - Command 'exit' from plugin 'exit' registered.
+2025-03-08 22:41:50,563 - root - INFO - Command 'goodbye' from plugin 'goodbye' registered.
+2025-03-08 22:41:50,564 - root - INFO - Command 'greet' from plugin 'greet' registered.
+2025-03-08 22:41:50,565 - root - INFO - Command 'menu' from plugin 'menu' registered.
+2025-03-08 22:41:50,565 - root - INFO - Application started. Type 'exit' to exit.
+2025-03-08 22:42:16,629 - root - INFO - Hello, World!
+2025-03-08 22:42:19,058 - root - INFO - Application exit.
+2025-03-08 22:42:19,058 - root - INFO - Application shutdown.
