@@ -9,7 +9,8 @@ import logging.config
 
 class App:
     def __init__(self):
-        os.makedirs('logs', exist_ok=True)
+        self.logs_dir = 'logs'
+        os.makedirs(self.logs_dir, exist_ok=True)
         self.configure_logging()
         load_dotenv()
         self.settings = self.load_environment_variables()
@@ -17,8 +18,14 @@ class App:
         self.command_handler = CommandHandler()
 
     def configure_logging(self):
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",handlers=[logging.StreamHandler(sys.stdout),logging.FileHandler("app.log", mode="a")])
-        logging.getLogger(__name__).info("Logging initialized successfully!")
+        log_file_path = os.path.join(self.logs_dir, "app.log")  # Log file inside logs directory
+        # Remove existing handlers if any (important for reruns in interactive environments)
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        # Reconfigure logging
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(log_file_path, mode="a")])
+        logging.getLogger(__name__).info(f"Logging initialized successfully! Logs saved in {log_file_path}")
+
 
     def load_environment_variables(self):
         settings = {key: value for key, value in os.environ.items()}
