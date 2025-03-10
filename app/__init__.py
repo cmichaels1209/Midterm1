@@ -1,94 +1,77 @@
 import os
-import sys
-import logging
-import importlib
 import pkgutil
-from dotenv import load_dotenv
+import importlib
+import sys
 from app.commands import CommandHandler, Command
-
-# Load environment variables ONCE at the start
-load_dotenv()
-
-# Configure logging ONCE at the start
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
-logger.info("Logging configured.")
-
-# Retrieve environment setting
-ENVIRONMENT = os.getenv("ENVIRONMENT", "production")  # Default to 'production' if not set
-logger.info(f"Running in {ENVIRONMENT} mode")
-
+from dotenv import load_dotenv
+import logging
+import logging.config
 
 class App:
     def __init__(self):
-        """Initialize the application."""
-        os.makedirs('logs', exist_ok=True)  # ✅ Ensure 'logs' directory exists
-        self.settings = self.load_environment_variables()  # ✅ Load environment variables
-        self.command_handler = CommandHandler()  # ✅ Initialize command handler
+        os.makedirs('logs', exist_ok=True)
+        self.configure_logging()
+        load_dotenv()
+        self.settings = self.load_environment_variables()
+        self.settings.setdefault('ENVIRONMENT', 'PRODUCTION')
+        self.command_handler = CommandHandler()
+
+    def configure_logging(self):
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",handlers=[logging.StreamHandler(sys.stdout),logging.FileHandler("app.log", mode="a")])
+        logging.getLogger(__name__).info("Logging initialized successfully!")
 
     def load_environment_variables(self):
-        """Load and return all environment variables, ensuring uppercase normalization."""
-        settings = {key.upper(): value.upper() for key, value in os.environ.items()}
+        settings = {key: value for key, value in os.environ.items()}
         logging.info("Environment variables loaded.")
         return settings
 
     def get_environment_variable(self, env_var: str = 'ENVIRONMENT'):
-        """Retrieve an environment variable."""
         return self.settings.get(env_var, None)
 
     def load_plugins(self):
-        """Dynamically load all plugins in the 'app.plugins' directory."""
-        plugins_package = "app.plugins"
-        plugins_dir = os.path.join(os.path.dirname(__file__), "plugins")
-
-        if not os.path.exists(plugins_dir):
-            logger.warning(f"Plugins directory '{plugins_dir}' not found.")
+        plugins_package = 'app.plugins'
+        plugins_path = plugins_package.replace('.', '/')
+        if not os.path.exists(plugins_path):
+            logging.warning(f"Plugins directory '{plugins_path}' not found.")
             return
-
-        for _, plugin_name, _ in pkgutil.iter_modules([plugins_dir]):
-            plugin_module = importlib.import_module(f"{plugins_package}.{plugin_name}")
-            self.register_plugin_commands(plugin_module, plugin_name)
+        for _, plugin_name, is_pkg in pkgutil.iter_modules([plugins_path]):
+            if is_pkg:
+                try:
+                    plugin_module = importlib.import_module(f'{plugins_package}.{plugin_name}')
+                    self.register_plugin_commands(plugin_module, plugin_name)
+                except ImportError as e:
+                    logging.error(f"Error importing plugin {plugin_name}: {e}")
 
     def register_plugin_commands(self, plugin_module, plugin_name):
-        """Register plugin commands dynamically."""
         for item_name in dir(plugin_module):
             item = getattr(plugin_module, item_name)
             if isinstance(item, type) and issubclass(item, Command) and item is not Command:
+                # Command names are now explicitly set to the plugin's folder name
                 self.command_handler.register_command(plugin_name, item())
-                logger.info(f"Registered command '{plugin_name}' from plugin '{plugin_name}'.")
+                logging.info(f"Command '{plugin_name}' from plugin '{plugin_name}' registered.")
 
     def start(self):
-        """Start the application REPL loop."""
         self.load_plugins()
-        print("Hello World. Type 'exit' to exit.")  # ✅ Print welcome message
-        logger.info("Application started. Type 'exit' to exit.")
-
+        print("Hello World. Type 'exit' to exit.")  # This must be printed
+        logging.info("Application started. Type 'exit' to exit.")
         try:
             while True:
                 cmd_input = input(">>> ").strip()
                 if cmd_input.lower() == 'exit':
-                    print("Exiting...")
-                    logger.info("Application exit.")
-                    sys.exit(0)  # ✅ Exit cleanly
+                    logging.info("Application exit.")
+                    sys.exit(0)  # Use sys.exit(0) for a clean exit, indicating success.
 
-                try:
-                    cmd_found = self.command_handler.execute_command(cmd_input)
-                    if not cmd_found:
-                        print(f"No such command: {cmd_input}")
-                        logger.error(f"Unknown command: {cmd_input}")
-                except Exception as e:
-                    print(f"Error executing command: {e}")
-                    logger.error(f"Error executing command {cmd_input}: {e}")
+                # Execute command and handle unknown commands gracefully
+                if not self.command_handler.execute_command(cmd_input):
+                    logging.error(f"Unknown command: {cmd_input}")
+                    print(f"No such command: {cmd_input}")  # Inform the user
 
         except KeyboardInterrupt:
-            print("Exiting...")
-            logger.info("Application interrupted. Exiting gracefully.")
-            sys.exit(0)
+            print("Exiting...")  # Also add it here for consistency
+            logging.info("Application interrupted and exiting gracefully.")
+            sys.exit(0)  # Clean exit on CTRL+C
         finally:
-            logger.info("Application shutdown.")
+            logging.info("Application shutdown.")
 
 if __name__ == "__main__":
     app = App()
