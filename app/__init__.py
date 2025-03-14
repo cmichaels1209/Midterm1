@@ -113,10 +113,24 @@ class App(cmd.Cmd):
         self.history_manager.clear_history()
         print("Calculation history cleared.")
 
-    def do_menu(self, args):
-        """Usage: menu - List available commands"""
-        commands = sorted(self.get_names())  # Get all available command names
-        print("Available commands:", ", ".join(commands))
+    def do_menu(self, arg):
+        """Display the available calculator commands."""
+        commands = {
+            "add": "Addition operation",
+            "subtract": "Subtraction operation",
+            "multiply": "Multiplication operation",
+            "divide": "Division operation",
+            "history": "View calculation history",
+            "clear_history": "Clear calculation history",
+            "logs": "View application logs",
+            "clear_logs": "Clear logs",
+            "exit": "Exit the calculator"
+        }
+
+        print("\nAvailable Commands:")
+        for command, description in commands.items():
+            print(f" - {command}: {description}")
+
 
 
     def do_exit(self, args):
