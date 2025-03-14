@@ -14,17 +14,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Clone Repository Manually
+      run: git clone https://github.com/cmichaels1209/homework6.git .
 
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12"
-
-    - name: Install dependencies
+    - name: Install Python Manually
       run: |
-        python -m venv venv
+        sudo apt update
+        sudo apt install -y python3 python3-venv python3-pip
+        python3 --version
+
+    - name: Set Up Virtual Environment
+      run: |
+        python3 -m venv venv
         source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
@@ -36,7 +37,7 @@ jobs:
         python --version
         pip list
 
-    - name: Run tests
+    - name: Run Tests
       run: |
         source venv/bin/activate
         pytest --cov
